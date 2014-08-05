@@ -1,0 +1,302 @@
+#!/bin/bash
+#
+# Written by Jose Damian Bazaga Ruiz
+# jdbazagaruiz@openmailbox.org
+#
+clear
+echo -e "*#*#*#   *#*#*#   *#*#*#   			     *#*#*#   *#*#*#   *#*#*#"	
+echo -e "			    FFMPEG BATCH CONVERTER"
+echo -e "*#*#*#   *#*#*#   *#*#*#   			     *#*#*#   *#*#*#   *#*#*#"
+echo -e "Welcome to ffmpegBatchConverter"
+echo -e "This program is useful for converting your mpeg files into ogg files, the free codification."
+echo -e "Thanks to the sites and authors from whom I took the information to write this scripts, being the main sources of bash information for me. You all do a great job by sharing useful info about free software:\n"
+echo -e "Press enter to continue."
+read brrr
+echo -e "www.desdelinux.net\twww.linuxcommandline.org\twww.tldp.\tmywiki.wooledge.org/EnglishFrontPage\twww.thegeekstuff.com\twww.cyberciti.bz\twww.stackoverflow"
+echo -e "\n"
+echo -e "DISCLAIMER: Please follow the instructions in the script.\nIt is strongly advised to make a BACKUP COPY of the directories and files your want to convertir before using this script,\njust in case the results are not the desired (one needs to be careful when doing batch operations)"
+echo -e "If you are not sure, press "CTRL+C" to exit the script without any changes to your files."
+echo -e "\n\n\n"
+echo -e "Select the desired option"
+echo -e "(1)- OGG Video\n(2)-OGG Audio\n(3)-Help\n(*)-Any other key, and then enter to exit"
+read opcion
+saludos="Thanks for using this script. Support GNU/Linux!"
+   ###   ###   ###   ###   ###
+if [[ "$opcion" == 1 ]]
+then
+	echo -e "   ***   VIDEO OGG   ***\nPress enter to continue"
+	read brrr
+	echo -e "How many files do you want to convert?:\n(1)-Single file\n(2)-Several files\n(3)-Full directory\n(4)-Full directory recursive\n(5)-Exit"
+	directorio_inicio="$PWD"
+	read opcion
+	# ***---   OPCION 1   ---***
+	if [[ "$opcion" == "1" ]]; then
+		echo -e "   ***   SINGLE FILE (MPEG - OGG)   ***\n"
+		echo -e "Write the directory where the file is located."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"
+		archivos=*mp4 
+		echo -e "Candidates files are:"	 
+		ls $archivos
+		echo -e "Write the name of the file to convert"
+		read archivo_Convertir
+		echo -e "You are going to convert $archivo_Convertir press CTRL+D to cancel, any other key and then enter to go on."
+		read brrr
+		ffmpeg -i "$archivo_Convertir" -acodec libvorbis -crf 18 -preset veryslow "${archivo_Convertir%mp4}ogg"
+		echo -e "Press 1 and then enter if you want to delete the mpeg file,\n any other key+enter to keep it."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			rm -f "$archivo_Convertir"
+			echo -e "Deleted: $archivo_Convertir"
+		else 
+			echo -e "Kept: $archivo_Convertir"
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+	# ***---   OPCION 2   ---***	
+	elif [[ "$opcion" == "2" ]]; then
+		
+		echo -e "   ***   MULTIPLES FILES (MPEG - OGG)   ***" 
+		echo -e "Write the path to the files you want to convert"
+		read directorio
+		echo -e "Selected directory: $directorio"
+		archivos=*mp4
+		cd $directorio
+		echo -e "Candidates are:"	
+		ls $archivos
+		echo -e "Write the name of the files to convert,\nseparated by blank spaces"
+		read -a archivos_Convertir
+		echo -e "You are about to convert ${archivos_Convertir[@]} to ogg.\nPress CTRL+C to cancel, any other key and then enter to go on."
+		read brrr
+		for k in ${archivos_Convertir[@]}
+			do
+				ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp4}ogg"	
+			done
+
+		echo -e "Press 1 and then enter to erase the mpeg files,\nany other key and then enter to keep them"
+		read mantener
+		if [[ "$mantener" == 1 ]];
+  		then
+			for k in ${archivos_Convertir[@]}
+			do
+				rm -f "$k"
+			done
+			echo -e "The mpeg files are erased."
+		else 
+			echo -e "The mpeg files are untouched."
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+	# ***---   OPCION 3   ---***
+	elif [[ "$opcion" == "3" ]]; then 
+		echo -e "FULL DIRECTORY MP4 - OGG"
+		echo -e "Write the path to the directory where the mpeg files\nyou want to convert are ketp."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"	
+		archivos=*mp4
+		echo -e "Files to convert:"	 
+		ls $archivos
+		read brrr
+		for k in ${archivos[@]}
+		do
+			ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp4}ogg"	
+		done
+		echo -e "Press 1 and then enter if you want to erase the mpeg files\n,press enter for keeping them untouched."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			for k in ${archivos[@]}
+			do
+				rm -f "$k"
+			done			
+			echo -e "The mpeg files have been deleted."
+		else 
+			echo -e "The mpeg files remain untouched."
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+
+	# ***--- OPCION 4 ---***
+	elif [[ "$opcion" == "4" ]]; then
+		echo -e "DIRECTORY RECURSIVE MPEG-OGG"
+		echo -e "Write the path to the directory which contains the files you want to convert."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"	
+		archivos=`find "$directorio" -name "*.mp4" `
+		echo -e "Files to convert:"
+		ls $archivos
+		read brrr
+
+		for k in ${archivos[@]}
+		do
+			ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp4}ogg"	
+		done
+
+		echo -e "Press 1 and then enter if you want to erase the mpeg files,\npress any other key and then enter to keep them."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			for k in ${archivos[@]}
+			do
+				rm -f "$k"
+			done
+			echo -e "The mpeg files have been deleted."
+		else 
+			echo -e "The mpeg files remain untouched."
+		fi
+
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+
+	# ***--- OPCION 5 ---***
+	else
+		echo -e "Incorrect option. Check out the main menu."
+	fi
+
+
+   ###   ###   ###   ###   ###   
+elif [[ "$opcion" == 2 ]]
+then
+	echo -e "   ***   OGG AUDIO   ***\nPresiona "enter" para continuar."	
+	echo -e "(1)-Archivo unico\n(2)-Multiples archivos\n(3)-Directorio completo\n(4)-Directorio recursivo\n(5)-Salir"
+	directorio_inicio="$PWD"
+	read opcion
+	# ***---   OPCION 1   ---***
+	if [[ "$opcion" == "1" ]]; then
+		echo -e "   ***   SINGLE FILE (MPEG - OGG)   ***\n"
+		echo -e "Write the directory where the file is located."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"
+		archivos=*mp[43] 
+		echo -e "Candidates files are:"	 
+		ls $archivos
+		echo -e "Write the name of the file to convert"
+		read archivo_Convertir
+		echo -e "You are going to convert $archivo_Convertir press CTRL+D to cancel, any other key and then enter to go on."
+		read brrr
+		ffmpeg -i "$archivo_Convertir" -acodec libvorbis -crf 18 -preset veryslow "${archivo_Convertir%mp[43]}ogg"
+		echo -e "Press 1 and then enter if you want to delete the mpeg file,\n any other key+enter to keep it."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			rm -f "$archivo_Convertir"
+			echo -e "Deleted: $archivo_Convertir"
+		else 
+			echo -e "Kept: $archivo_Convertir"
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+	# ***---   OPCION 2   ---***	
+	elif [[ "$opcion" == "2" ]]; then
+		
+		echo -e "   ***   MULTIPLES FILES (MPEG - OGG)   ***" 
+		echo -e "Write the path to the files you want to convert"
+		read directorio
+		echo -e "Selected directory: $directorio"
+		archivos=*mp[43]
+		cd $directorio
+		echo -e "Candidates are:"	
+		ls $archivos
+		echo -e "Write the name of the files to convert,\nseparated by blank spaces"
+		read -a archivos_Convertir
+		echo -e "You are about to convert ${archivos_Convertir[@]} to ogg.\nPress CTRL+C to cancel, any other key and then enter to go on."
+		read brrr
+		for k in ${archivos_Convertir[@]}
+			do
+				ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp[43]}ogg"	
+			done
+
+		echo -e "Press 1 and then enter to erase the mpeg files,\nany other key and then enter to keep them"
+		read mantener
+		if [[ "$mantener" == 1 ]];
+  		then
+			for k in ${archivos_Convertir[@]}
+			do
+				rm -f "$k"
+			done
+			echo -e "The mpeg files are erased."
+		else 
+			echo -e "The mpeg files are untouched."
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+	# ***---   OPCION 3   ---***
+	elif [[ "$opcion" == "3" ]]; then 
+		echo -e "FULL DIRECTORY MP4 - OGG"
+		echo -e "Write the path to the directory where the mpeg files\nyou want to convert are ketp."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"	
+		archivos=*mp[43]
+		echo -e "Files to convert:"	 
+		ls $archivos
+		read brrr
+		for k in ${archivos[@]}
+		do
+			ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp[43]}ogg"	
+		done
+		echo -e "Press 1 and then enter if you want to erase the mpeg files\n,press enter for keeping them untouched."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			for k in ${archivos[@]}
+			do
+				rm -f "$k"
+			done			
+			echo -e "The mpeg files have been deleted."
+		else 
+			echo -e "The mpeg files remain untouched."
+		fi
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+
+	# ***--- OPCION 4 ---***
+	elif [[ "$opcion" == "4" ]]; then
+		echo -e "DIRECTORY RECURSIVE MPEG-OGG"
+		echo -e "Write the path to the directory which contains the files you want to convert."
+		read directorio
+		echo -e "Selected directory: $directorio"
+		cd "$directorio"	
+		archivos=`find "$directorio" -name "*.mp[43]" `
+		echo -e "Files to convert:"
+		ls $archivos
+		read brrr
+
+		for k in ${archivos[@]}
+		do
+			ffmpeg -i "$k" -acodec libvorbis -crf 18 -preset veryslow "${k%mp[43]}ogg"	
+		done
+
+		echo -e "Press 1 and then enter if you want to erase the mpeg files,\npress any other key and then enter to keep them."
+		read mantener
+		if [[ "$mantener" == 1 ]]; then
+			for k in ${archivos[@]}
+			do
+				rm -f "$k"
+			done
+			echo -e "The mpeg files have been deleted."
+		else 
+			echo -e "The mpeg files remain untouched."
+		fi
+
+		cd "$directorio_inicio"
+		echo -e "$saludos"
+
+	# ***--- OPCION 5 ---***
+	else
+		echo -e "Incorrect option. Check out the main menu."
+	fi
+
+  ###   ###   ###   ###   ###
+elif [[ "$opcion" == "3" ]]
+then
+	echo -e "Escribeme a mi correo:\n\n\tjdbazagaruiz@openmailbox.org"
+	echo -e "Sometimes it takes me more to answer, sometimes less, but I answer."
+	echo -e "KNOWN ISSUES:\n"
+	echo -e "\n1.\n"
+	echo -e "\tIf you have files with the same name in the same directory\nbut with different extensions you might get overwriting problems. For instance:\n\tIf you have the files madonnaConcert.mp4 y madonnaConcert.mp3 in the same directory, the script will not be able to make a different ogg for each one.\n\tWorkaround: There are 2 possibilities, one of them is moving the mp3 to a different directory (you can create it for that purpouse) or rename the mp3 or mp4 files, so they do not have the same name."
+	echo -e "\n2.\n"
+	echo -e "The script will not execute unless you have the execute permission.\n\tIf you are the admin, use the chmod command with the +x option (chmod +x ffmpegBatch.bash will do the trick)"
+else 
+	echo -e "$saludos"
+fi
